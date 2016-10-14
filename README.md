@@ -1,4 +1,4 @@
-# Tucao API
+# Stackshot API
 
 ```bash
 $ npm install
@@ -7,8 +7,6 @@ $ npm run dev
 ```
 
 ## Before getting started
-
-TODO: wrap in a docker container
 
 ### Generating RSA keys
 
