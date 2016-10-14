@@ -6,7 +6,7 @@ POST `/shot`
 
 |参数|类型|必需|描述|
 |---|---|---|---|
-|images|array|√|图片地址|
+|images|array|✅|图片地址|
 |tags|array||标签|
 
 参数示例:
