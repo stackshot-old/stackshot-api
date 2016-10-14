@@ -48,7 +48,5 @@ export async function shots(ctx) {
     .populate('user', 'username avatar')
     .exec()
 
-  ctx.body = {
-    data: shots
-  }
+  ctx.body = shots
 }
