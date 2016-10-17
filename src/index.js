@@ -42,6 +42,7 @@ app.use(convert(jwt({
 app.use(privateRouter.routes())
 app.use(privateRouter.allowedMethods())
 
-app.listen(7999, () => {
-  console.log('http://localhost:7999')
+const port = process.env.PORT
+app.listen(port, () => {
+  console.log(`http://localhost:${port}`)
 })
