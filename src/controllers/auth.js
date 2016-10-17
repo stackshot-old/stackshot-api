@@ -35,6 +35,7 @@ export async function signup(ctx) {
       user: picker(user.toObject(), 'username avatar createdAt updatedAt')
     }
   } catch (e) {
+    ctx.status = 403
     ctx.body = e
   }
 }
