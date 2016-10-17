@@ -10,11 +10,15 @@ function uploadImageStream(file) {
     if (['png', 'jpg', 'jpeg', 'gif', 'webp'].indexOf(ext) === -1) {
       return reject(new Error('Unsupported image type'))
     }
-    qn.upload(file, {key: `media/upload_images/${random.generate(10)}.${ext}`}, (err, res) => {
+    const hash = random.generate(10)
+    qn.upload(file, {key: `media/upload_images/${hash}.${ext}`}, (err, res) => {
       if (err) {
         return reject(new Error(err))
       }
-      resolve(res)
+      resolve({
+        ...res,
+        hash
+      })
     })
   })
 }
@@ -25,10 +29,9 @@ export async function uploadImage(ctx) {
     const res = await Promise.all(files.map(file => {
       return uploadImageStream(file)
     }))
-    ctx.body = {
-      images: res
-    }
+    ctx.body = res
   } catch (e) {
+    ctx.body = 403
     ctx.body = {
       error: e.message
     }
