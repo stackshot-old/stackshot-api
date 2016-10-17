@@ -14,7 +14,9 @@ import privateRouter from './routers/private-router'
 const app = new Koa()
 
 app.use(convert(cors()))
-app.use(bodyparser())
+app.use(bodyparser({
+  formLimit: '1024kb'
+}))
 app.use(publicRouter.routes())
 app.use(publicRouter.allowedMethods())
 
