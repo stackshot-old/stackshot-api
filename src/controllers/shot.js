@@ -5,7 +5,7 @@ import {validate} from '../common/helpers'
 
 export async function addShot(ctx) {
   const user = await User
-    .findOne({apiKey: ctx.state.user.apiKey})
+    .findOne({_id: ctx.state.user.sub})
     .select('username')
     .exec()
 
@@ -24,7 +24,9 @@ export async function addShot(ctx) {
     shotData = await validate(shotData, joi.object().keys({
       images: joi.array().items(joi.object().keys({
         url: joi.string().required(),
-        description: joi.any().optional()
+        description: joi.any().optional(),
+        width: joi.number().required(),
+        height: joi.number().required()
       }).required()).required(),
       tags: joi.array().items(joi.string())
     }))

@@ -29,7 +29,10 @@ export async function signup(ctx) {
     const user = new User(userData)
     await user.save()
 
-    const token = jwt.sign({apiKey: userData.apiKey}, privateKey, {algorithm: 'RS256'})
+    const token = jwt.sign({sub: user.id}, privateKey, {
+      algorithm: 'RS256',
+      expiresIn: '180d' // half a year
+    })
     ctx.body = {
       token,
       user: picker(user.toObject(), 'username avatar createdAt updatedAt')
@@ -78,7 +81,7 @@ export async function signin(ctx) {
     }
   }
 
-  const token = jwt.sign({apiKey: user.apiKey}, privateKey, {algorithm: 'RS256'})
+  const token = jwt.sign({sub: user.id}, privateKey, {algorithm: 'RS256'})
   ctx.body = {
     token,
     user: picker(user.toObject(), 'username avatar createdAt updatedAt')
