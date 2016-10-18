@@ -7,6 +7,6 @@ const router = new Router()
 
 router.post('/shot', shot.addShot)
 router.get('/me', user.me)
-router.post('/media/upload_image', media.uploadImage)
+router.put('/media/upload_image', media.uploadImage)
 
 export default router

@@ -2,7 +2,7 @@
 
 ## 上传图片
 
-POST `/media/upload_image`
+PUT `/media/upload_image`
 
 返回示例:
 
