@@ -35,6 +35,7 @@ export async function addShot(ctx) {
     const shot = new Shot(shotData)
     ctx.body = await shot.save()
   } catch (e) {
+    ctx.status = 403
     console.log(e.stack)
     ctx.body = e
   }
