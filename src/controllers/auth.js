@@ -1,7 +1,7 @@
 import joi from 'joi'
 import jwt from 'koa-jwt'
 import uuid from 'node-uuid'
-import picker from 'object-picker'
+import _ from 'lodash'
 import User from '../models/user'
 import {
   encrypt,
@@ -56,6 +56,7 @@ export async function signin(ctx) {
       password: joi.string().min(6).max(20).required()
     }))
   } catch (e) {
+    ctx.status = 403
     ctx.body = e
     return
   }
@@ -68,6 +69,7 @@ export async function signin(ctx) {
   }).exec()
 
   if (!user) {
+    ctx.status = 404
     return ctx.body = {
       error: 'User not found'
     }
@@ -76,6 +78,7 @@ export async function signin(ctx) {
   const isPasswordCorrect = await encrypt.compare(userData.password, user.password)
 
   if (!isPasswordCorrect) {
+    ctx.status = 403
     return ctx.body = {
       error: 'Passoword mismatches'
     }
@@ -84,6 +87,8 @@ export async function signin(ctx) {
   const token = jwt.sign({sub: user.id}, privateKey, {algorithm: 'RS256'})
   ctx.body = {
     token,
-    user: picker(user.toObject(), 'username avatar createdAt updatedAt')
+    user: _.pick(user.toObject(), [
+      'username', 'avatar', 'createdAt', 'updatedAt'
+    ])
   }
 }

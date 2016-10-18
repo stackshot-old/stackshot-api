@@ -2621,6 +2621,10 @@ load-json-file@^2.0.0:
     pify "^2.0.0"
     strip-bom "^3.0.0"
 
+lodash, lodash@^4.0.0, lodash@^4.13.1, lodash@^4.2.0, lodash@^4.3.0, lodash@^4.5.1, lodash@^4.8.0:
+  version "4.16.4"
+  resolved "http://registry.npm.taobao.org/lodash/download/lodash-4.16.4.tgz#01ce306b9bad1319f2a5528674f88297aeb70127"
+
 lodash._baseassign@^3.0.0:
   version "3.2.0"
   resolved "http://registry.npm.taobao.org/lodash._baseassign/download/lodash._baseassign-3.2.0.tgz#8c38a099500f215ad09e59f1722fd0c52bfe0a4e"
@@ -2714,10 +2718,6 @@ lodash.snakecase@^4.0.1:
 lodash.upperfirst@^4.2.0:
   version "4.3.1"
   resolved "http://registry.npm.taobao.org/lodash.upperfirst/download/lodash.upperfirst-4.3.1.tgz#1365edf431480481ef0d1c68957a5ed99d49f7ce"
-
-lodash@^4.0.0, lodash@^4.13.1, lodash@^4.2.0, lodash@^4.3.0, lodash@^4.5.1, lodash@^4.8.0:
-  version "4.16.4"
-  resolved "http://registry.npm.taobao.org/lodash/download/lodash-4.16.4.tgz#01ce306b9bad1319f2a5528674f88297aeb70127"
 
 log-symbols@^1.0.2:
   version "1.0.2"
@@ -3054,10 +3054,6 @@ object-assign@^3.0.0:
 object-assign@^4.0.1, object-assign@^4.1.0:
   version "4.1.0"
   resolved "http://registry.npm.taobao.org/object-assign/download/object-assign-4.1.0.tgz#7a3b3d0e98063d43f4c03f2e8ae6cd51a86883a0"
-
-object-picker@^0.1.0:
-  version "0.1.0"
-  resolved "http://registry.npm.taobao.org/object-picker/download/object-picker-0.1.0.tgz#16ea2e505ace3b62bfdbc22759fe3b37c66eb1f3"
 
 object.omit@^2.0.0:
   version "2.0.0"
