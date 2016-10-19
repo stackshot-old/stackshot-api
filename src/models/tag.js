@@ -4,20 +4,14 @@ import timestamp from 'mongoose-timestamp'
 const schema = new Schema({
   user: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    required: true
   },
-  images: {
-    type: Array
+  name: {
+    type: String,
+    required: true
   },
-  tags: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Tag'
-  }],
-  commentCount: {
-    type: Number,
-    default: 0
-  },
-  likeCount: {
+  count: {
     type: Number,
     default: 0
   }
@@ -25,4 +19,4 @@ const schema = new Schema({
 
 schema.plugin(timestamp)
 
-export default mongoose.model('Shot', schema)
+export default mongoose.model('Tag', schema)
