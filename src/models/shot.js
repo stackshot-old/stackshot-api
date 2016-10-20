@@ -13,11 +13,11 @@ const schema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Tag'
   }],
-  commentCount: {
+  commentsCount: {
     type: Number,
     default: 0
   },
-  likeCount: {
+  likesCount: {
     type: Number,
     default: 0
   }

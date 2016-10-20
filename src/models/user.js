@@ -19,6 +19,22 @@ const schema = new mongoose.Schema({
   },
   apiKey: {
     type: String
+  },
+  shotsCount: {
+    type: Number,
+    default: 0
+  },
+  commentsCount: {
+    type: Number,
+    default: 0
+  },
+  followersCount: {
+    type: Number,
+    default: 0
+  },
+  followingsCount: {
+    type: Number,
+    default: 0
   }
 })
 

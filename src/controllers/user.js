@@ -1,9 +1,15 @@
 import User from '../models/user'
 
-export async function me(ctx) {
+export async function getUserByUsername(ctx) {
+  const username = ctx.params.username
   const user = await User
-    .findOne({apiKey: ctx.state.user.apiKey})
-    .select('username email createdAt updatedAt')
+    .findOne({username})
+    .select('username createdAt updatedAt avatar shotsCount commentsCount followersCount followingsCount')
     .exec()
-  ctx.body = user
+  if (user) {
+    ctx.body = user
+  } else {
+    ctx.status = 404
+    ctx.body = 'user not found'
+  }
 }

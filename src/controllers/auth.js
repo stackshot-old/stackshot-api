@@ -2,6 +2,7 @@ import joi from 'joi'
 import jwt from 'koa-jwt'
 import uuid from 'node-uuid'
 import _ from 'lodash'
+import md5 from 'md5'
 import User from '../models/user'
 import {
   encrypt,
@@ -23,6 +24,7 @@ export async function signup(ctx) {
       password: joi.string().min(6).max(20).required()
     }))
 
+    userData.avatar = `https://cdn.v2ex.co/gravatar/${md5(userData.email)}`
     userData.password = await encrypt.hash(userData.password, 10)
     userData.apiKey = uuid.v4()
 
@@ -35,11 +37,14 @@ export async function signup(ctx) {
     })
     ctx.body = {
       token,
-      user: picker(user.toObject(), 'username avatar createdAt updatedAt')
+      user: _.pick(user.toObject(), [
+        'username', 'avatar', 'createdAt', 'updatedAt'
+      ])
     }
   } catch (e) {
+    console.log(e.stack)
     ctx.status = 403
-    ctx.body = e
+    ctx.body = e.message
   }
 }
 

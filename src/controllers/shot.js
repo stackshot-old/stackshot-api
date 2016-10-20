@@ -5,17 +5,7 @@ import Tag from '../models/tag'
 import {validate} from '../common/helpers'
 
 export async function addShot(ctx) {
-  const user = await User
-    .findOne({_id: ctx.state.user.sub})
-    .select('username')
-    .exec()
-
-  if (!user) {
-    ctx.body = {
-      error: 'User not found'
-    }
-    return
-  }
+  const id = ctx.state.user.sub
 
   let shotData = {
     images: ctx.request.body.images,
@@ -32,16 +22,18 @@ export async function addShot(ctx) {
       }).required()).required(),
       tags: joi.array().items(joi.string())
     }))
-    shotData.user = user
+    shotData.user = id
 
     if (shotData.tags.length > 0) {
       shotData.tags = await Promise.all(shotData.tags.map(async tagName => {
-        const tag = await Tag.findOne({name: tagName})
-          .populate('user', 'username avatar')
-          .exec()
+        // find an existing tag and update its count
+        const tag = await Tag.findOneAndUpdate({name: tagName}, {
+          $inc: {count: 1}
+        }).populate('user', 'username avatar').exec()
         if (tag) {
           return tag
         } else {
+          // tag does not exist, create a new one
           const newTag = new Tag({name: tagName, user: user})
           return await newTag.save()
         }
@@ -49,23 +41,57 @@ export async function addShot(ctx) {
     }
 
     const shot = new Shot(shotData)
-    ctx.body = await shot.save()
+    const savedShot = await shot.save()
+
+    // inc shotsComment in user schema
+    await User.findOneAndUpdate({_id: id}, {
+      $inc: {shotsCount: 1}
+    }).exec()
+
+    ctx.body = savedShot
   } catch (e) {
     ctx.status = 403
     console.log(e.stack)
-    ctx.body = e
+    ctx.body = e.message
   }
 }
 
-export async function shots(ctx) {
-  const {skip = 0, limit = 20} = ctx.query
+export async function getShots(ctx) {
+  const {limit = 10, before} = ctx.query
+  const {username} = ctx.params
+
+  const query = {}
+  if (before) {
+    query.createdAt = {$lt: new Date(before)}
+  }
+
+  if (username) {
+    const user = await User.findOne({user}).exec()
+    if (!user) {
+      ctx.status = 404
+      ctx.body = 'user not found'
+      return
+    }
+    query.user = user
+  }
+
   const shots = await Shot
-    .find()
+    .find(query)
     .sort('-createdAt')
-    .skip(parseInt(skip, 10))
     .limit(parseInt(limit, 10))
     .populate('user', 'username avatar')
     .exec()
 
   ctx.body = shots
+}
+
+export async function getShotById(ctx) {
+  const {id} = ctx.params
+
+  const shot = await Shot
+    .findOne({_id: id})
+    .populate('user', 'username avatar')
+    .exec()
+
+  ctx.body = shot
 }
