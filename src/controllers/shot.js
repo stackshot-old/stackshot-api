@@ -66,7 +66,7 @@ export async function getShots(ctx) {
   }
 
   if (username) {
-    const user = await User.findOne({user}).exec()
+    const user = await User.findOne({username}).exec()
     if (!user) {
       ctx.status = 404
       ctx.body = 'user not found'
