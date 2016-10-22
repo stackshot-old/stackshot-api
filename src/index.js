@@ -4,6 +4,7 @@ import jwt from 'koa-jwt'
 import convert from 'koa-convert'
 import cors from 'kcors'
 import {publicKey} from './common/helpers'
+import handleSocket from './handle-socket'
 
 import './env'
 import './db'
@@ -42,7 +43,10 @@ app.use(convert(jwt({
 app.use(privateRouter.routes())
 app.use(privateRouter.allowedMethods())
 
+const server = require('http').Server(app.callback())
+handleSocket(server)
+
 const port = process.env.PORT
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`http://localhost:${port}`)
 })

@@ -48,6 +48,11 @@ export async function addShot(ctx) {
       $inc: {shotsCount: 1}
     }).exec()
 
+    const populated = await Shot.populate(savedShot, {
+      path: 'user',
+      select: 'username avatar'
+    })
+    io.emit('new-shot', populated)
     ctx.body = savedShot
   } catch (e) {
     ctx.status = 403
