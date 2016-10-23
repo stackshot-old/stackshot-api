@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import uniqueValidator from 'mongoose-unique-validator'
 import timestamp from 'mongoose-timestamp'
+import _ from 'lodash'
 
 const schema = new mongoose.Schema({
   username: {
@@ -40,5 +41,14 @@ const schema = new mongoose.Schema({
 
 schema.plugin(uniqueValidator)
 schema.plugin(timestamp)
+
+schema.methods.getPublic = function () {
+  return _.pick(this, [
+    'username',
+    'createdAt',
+    'updatedAt',
+    '_id'
+  ])
+}
 
 export default mongoose.model('User', schema)

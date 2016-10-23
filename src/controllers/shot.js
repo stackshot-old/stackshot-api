@@ -5,7 +5,9 @@ import Tag from '../models/tag'
 import {validate} from '../common/helpers'
 
 export async function addShot(ctx) {
-  const id = ctx.state.user.sub
+  const userId = ctx.state.user.sub
+  // used for updating shot
+  const shotId = ctx.request.body.id
 
   let shotData = {
     images: ctx.request.body.images,
@@ -22,8 +24,9 @@ export async function addShot(ctx) {
       }).required()).required(),
       tags: joi.array().items(joi.string())
     }))
-    shotData.user = id
+    shotData.user = userId
 
+    // tags: added tags
     if (shotData.tags.length > 0) {
       shotData.tags = await Promise.all(shotData.tags.map(async tagName => {
         // find an existing tag and update its count
@@ -39,35 +42,47 @@ export async function addShot(ctx) {
         }
       }))
     }
+    // TODO: deleredTags
+    // decrease tag count for deletedTags in the shot
+    let savedShot
+    console.log(savedShot);
 
-    const shot = new Shot(shotData)
-    const savedShot = await shot.save()
+    if (shotId) {
+      savedShot = await Shot
+        .findOneAndUpdate({_id: shotId, user: userId}, shotData)
+        .exec()
+    } else {
+      const shot = new Shot(shotData)
+      savedShot = await shot.save()
+      const populated = await Shot.populate(savedShot, {
+        path: 'user',
+        select: 'username avatar'
+      })
+      io.emit('new-shot', populated)
+      // inc shotsComment in user schema
+      await User.findOneAndUpdate({_id: userId}, {
+        $inc: {shotsCount: 1}
+      }).exec()
+    }
 
-    // inc shotsComment in user schema
-    await User.findOneAndUpdate({_id: id}, {
-      $inc: {shotsCount: 1}
-    }).exec()
-
-    const populated = await Shot.populate(savedShot, {
-      path: 'user',
-      select: 'username avatar'
-    })
-    io.emit('new-shot', populated)
     ctx.body = savedShot
   } catch (e) {
     ctx.status = 403
     console.log(e.stack)
-    ctx.body = e.message
+    ctx.body = e
   }
 }
 
 export async function getShots(ctx) {
-  const {limit = 10, before} = ctx.query
+  const {limit = 10, before, after} = ctx.query
   const {username} = ctx.params
 
   const query = {}
   if (before) {
     query.createdAt = {$lt: new Date(before)}
+  }
+  if (after) {
+    query.createdAt = {$gt: new Date(after)}
   }
 
   if (username) {

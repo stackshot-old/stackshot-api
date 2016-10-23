@@ -37,14 +37,12 @@ export async function signup(ctx) {
     })
     ctx.body = {
       token,
-      user: _.pick(user.toObject(), [
-        'username', 'avatar', 'createdAt', 'updatedAt'
-      ])
+      user: user.getPublic()
     }
   } catch (e) {
     console.log(e.stack)
     ctx.status = 403
-    ctx.body = e.message
+    ctx.body = e
   }
 }
 
@@ -71,7 +69,9 @@ export async function signin(ctx) {
       {username: userData.account},
       {email: userData.account}
     ]
-  }).exec()
+  })
+    .select('username avatar createdAt updatedAt password')
+    .exec()
 
   if (!user) {
     ctx.status = 404
@@ -81,6 +81,7 @@ export async function signin(ctx) {
   }
 
   const isPasswordCorrect = await encrypt.compare(userData.password, user.password)
+  user.password = undefined
 
   if (!isPasswordCorrect) {
     ctx.status = 403
@@ -92,8 +93,6 @@ export async function signin(ctx) {
   const token = jwt.sign({sub: user.id}, privateKey, {algorithm: 'RS256'})
   ctx.body = {
     token,
-    user: _.pick(user.toObject(), [
-      'username', 'avatar', 'createdAt', 'updatedAt'
-    ])
+    user
   }
 }
