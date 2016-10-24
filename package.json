@@ -44,6 +44,7 @@
     "babel-runtime": "^6.9.2",
     "bcrypt": "^0.8.7",
     "dotenv": "^2.0.0",
+    "graphql": "^0.7.2",
     "joi": "^9.0.4",
     "kcors": "^1.2.1",
     "koa": "^2.0.0-alpha.4",
