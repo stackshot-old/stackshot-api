@@ -15,9 +15,11 @@ export default new ObjectType({
     avatar: {type: StringType},
     password: {type: StringType},
     token: {type: StringType},
+    createdAt: {type: StringType},
+    updatedAt: {type: StringType},
     shotsCount: {type: Int},
     commentsCount: {type: Int},
     followersCount: {type: Int},
-    followingsCount: { type: Int}
+    followingsCount: { type: Int},
   }
 })
