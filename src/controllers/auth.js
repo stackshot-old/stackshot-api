@@ -40,7 +40,6 @@ export async function signup(ctx) {
       user: user.getPublic()
     }
   } catch (e) {
-    console.log(e.stack)
     ctx.status = 403
     ctx.body = e
   }

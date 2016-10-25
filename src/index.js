@@ -5,6 +5,7 @@ import convert from 'koa-convert'
 import cors from 'kcors'
 import {publicKey} from './common/helpers'
 import handleSocket from './handle-socket'
+import schema from './graphql/schema'
 
 import './env'
 import './db'
@@ -18,6 +19,7 @@ app.use(convert(cors()))
 app.use(bodyparser({
   formLimit: '1024kb'
 }))
+
 app.use(publicRouter.routes())
 app.use(publicRouter.allowedMethods())
 
