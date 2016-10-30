@@ -4,14 +4,17 @@ import Shot from '../models/shot'
 import Tag from '../models/tag'
 import {validate} from '../common/helpers'
 
-export async function addShot(ctx) {
+
+async function addImage(ctx) {
   const userId = ctx.state.user.sub
   // used for updating shot
   const shotId = ctx.request.body.id
 
   let shotData = {
     images: ctx.request.body.images,
-    tags: ctx.request.body.tags || []
+    tags: ctx.request.body.tags || [],
+    content: ctx.request.body.content,
+    type: ctx.request.body.type
   }
 
   try {
@@ -21,8 +24,10 @@ export async function addShot(ctx) {
         description: joi.any().optional(),
         width: joi.number().required(),
         height: joi.number().required()
-      }).required()).required(),
-      tags: joi.array().items(joi.string())
+      }).required()),
+      tags: joi.array().items(joi.string()),
+      content: joi.string(),
+      type: joi.string().required()
     }))
     shotData.user = userId
 
@@ -73,6 +78,61 @@ export async function addShot(ctx) {
   }
 }
 
+async function addComment(ctx) {
+  const userId = ctx.state.user.sub
+  const {parent, replyTo, content, type} = ctx.request.body
+  let shotData = {
+    type,
+    content,
+    replyTo,
+    parent
+  }
+
+  try {
+    shotData = await validate(shotData, joi.object().keys({
+      type: joi.string().required(),
+      parent: joi.string().required(),
+      content: joi.string(),
+      replyTo: joi.string()
+    }))
+    shotData.user = userId
+
+    let savedShot
+    const shot = new Shot(shotData)
+    savedShot = await shot.save()
+    const populated = await Shot.populate(savedShot, [
+      { path: 'user', select: 'username avatar' },
+      { path: 'parent', select: '_id'},
+      { path: 'replyTo', select: 'username avatar'}
+    ])
+    io.emit('new-comment', populated)
+    // inc shotsComment in user schema
+    await Shot.findOneAndUpdate({_id: parent},
+      { $push:{latestComment: { $each:[savedShot._id], $slice: -7 } }, $inc: {commentsCount: 1 }}).exec()
+
+    ctx.body = savedShot
+  } catch (e) {
+    ctx.status = 403
+    console.log(e.stack)
+    ctx.body = e
+  }
+}
+
+
+export async function addShot(ctx) {
+  switch (ctx.request.body.type) {
+    case 'image':
+      await addImage(ctx)
+      break
+    case 'comment':
+      await addComment(ctx)
+      break
+    default:
+      ctx.status = 400
+      ctx.body="type must be required"
+  }
+}
+
 export async function getShots(ctx) {
   const {limit = 10, before, after} = ctx.query
   const {username} = ctx.params
@@ -100,6 +160,8 @@ export async function getShots(ctx) {
     .sort('-createdAt')
     .limit(parseInt(limit, 10))
     .populate('user', 'username avatar')
+    .populate('latestComment', '_id content user')
+    .populate('replyTo', 'username avatar')
     .exec()
 
   ctx.body = shots
