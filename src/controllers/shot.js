@@ -136,6 +136,7 @@ export async function addShot(ctx) {
 export async function getShots(ctx) {
   const {limit = 10, before, after} = ctx.query
   const {username} = ctx.params
+  const {sub} = ctx.state.user || {}
 
   const query = {}
   if (before) {
@@ -155,6 +156,8 @@ export async function getShots(ctx) {
     query.user = user
   }
 
+
+
   const shots = await Shot
     .find(query)
     .sort('-createdAt')
@@ -164,6 +167,10 @@ export async function getShots(ctx) {
     .populate('replyTo', 'username avatar')
     .exec()
 
+  shots.map(shot=> {
+    shot.liked = shot.likedUser.indexOf(sub) > -1
+    return shot
+  })
   ctx.body = shots
 }
 
@@ -176,4 +183,24 @@ export async function getShotById(ctx) {
     .exec()
 
   ctx.body = shot
+}
+
+export async function PutShotById(ctx){
+  const userId = ctx.state.user.sub
+  const {id} = ctx.params
+  const {liked} = ctx.request.body
+
+  if(liked === true){
+    await User.findOneAndUpdate({_id: userId},{ $addToSet:{likedShot: id }} ).exec()
+    await Shot.findOneAndUpdate({_id: id},{$addToSet:{likedUser: userId }, $inc:{ likesCount: 1}}).exec()
+  }
+  if(liked === false) {
+    await Shot.findOneAndUpdate({_id: id, likesCount: {$gt: 0}}, {$pull:{likedUser: userId}, $inc:{ likesCount: -1}}).exec()
+    await User.findOneAndUpdate({_id: userId}, { $pull:{likedShot: id}}).exec()
+  }
+  const data = await Promise.all([
+    User.findOne({_id: userId}),
+    Shot.findOne({_id: id})
+  ])
+  ctx.body = {user: data['0'], shot: data['1']}
 }

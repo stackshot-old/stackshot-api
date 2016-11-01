@@ -36,6 +36,9 @@ const schema = new mongoose.Schema({
   followingsCount: {
     type: Number,
     default: 0
+  },
+  likedShot: {
+    type: Array
   }
 })
 

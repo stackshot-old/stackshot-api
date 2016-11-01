@@ -24,10 +24,6 @@ const schema = new Schema({
     type: Number,
     default: 0
   },
-  liked: {
-    type: Boolean,
-    default: false,
-  },
   parent: {
     type: Schema.Types.ObjectId,
     ref: 'Shot'
@@ -47,6 +43,18 @@ const schema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Tag'
   }],
+  likedUser: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  status: {
+    type: Schema.Types.ObjectId,
+    ref: 'Status'
+  },
+  liked: {
+    type: Boolean,
+    default: false
+  }
 })
 
 schema.plugin(timestamp)

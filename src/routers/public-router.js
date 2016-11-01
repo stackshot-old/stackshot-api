@@ -8,7 +8,6 @@ const router = new Router()
 router.post('/auth/signup', auth.signup)
 router.post('/auth/signin', auth.signin)
 
-router.get('/shots', shot.getShots)
 router.get('/shots/:id', shot.getShotById)
 
 router.get('/user/:username', user.getUserByUsername)
