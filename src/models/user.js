@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, {Schema} from 'mongoose'
 import uniqueValidator from 'mongoose-unique-validator'
 import timestamp from 'mongoose-timestamp'
 import _ from 'lodash'
@@ -37,9 +37,10 @@ const schema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  likedShot: {
-    type: Array
-  }
+  likedShot: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Shot'
+  }]
 })
 
 schema.plugin(uniqueValidator)

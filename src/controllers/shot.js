@@ -2,10 +2,12 @@ import joi from 'joi'
 import User from '../models/user'
 import Shot from '../models/shot'
 import Tag from '../models/tag'
+import Comment from '../models/comment'
 import {validate} from '../common/helpers'
+import {checkShots} from '../utils'
 
 
-async function addImage(ctx) {
+export async function addShot(ctx) {
   const userId = ctx.state.user.sub
   // used for updating shot
   const shotId = ctx.request.body.id
@@ -14,7 +16,6 @@ async function addImage(ctx) {
     images: ctx.request.body.images,
     tags: ctx.request.body.tags || [],
     content: ctx.request.body.content,
-    type: ctx.request.body.type
   }
 
   try {
@@ -27,7 +28,6 @@ async function addImage(ctx) {
       }).required()),
       tags: joi.array().items(joi.string()),
       content: joi.string(),
-      type: joi.string().required()
     }))
     shotData.user = userId
 
@@ -78,61 +78,6 @@ async function addImage(ctx) {
   }
 }
 
-async function addComment(ctx) {
-  const userId = ctx.state.user.sub
-  const {parent, replyTo, content, type} = ctx.request.body
-  let shotData = {
-    type,
-    content,
-    replyTo,
-    parent
-  }
-
-  try {
-    shotData = await validate(shotData, joi.object().keys({
-      type: joi.string().required(),
-      parent: joi.string().required(),
-      content: joi.string(),
-      replyTo: joi.string()
-    }))
-    shotData.user = userId
-
-    let savedShot
-    const shot = new Shot(shotData)
-    savedShot = await shot.save()
-    const populated = await Shot.populate(savedShot, [
-      { path: 'user', select: 'username avatar' },
-      { path: 'parent', select: '_id'},
-      { path: 'replyTo', select: 'username avatar'}
-    ])
-    io.emit('new-comment', populated)
-    // inc shotsComment in user schema
-    await Shot.findOneAndUpdate({_id: parent},
-      { $push:{latestComment: { $each:[savedShot._id], $slice: -7 } }, $inc: {commentsCount: 1 }}).exec()
-
-    ctx.body = savedShot
-  } catch (e) {
-    ctx.status = 403
-    console.log(e.stack)
-    ctx.body = e
-  }
-}
-
-
-export async function addShot(ctx) {
-  switch (ctx.request.body.type) {
-    case 'image':
-      await addImage(ctx)
-      break
-    case 'comment':
-      await addComment(ctx)
-      break
-    default:
-      ctx.status = 400
-      ctx.body="type must be required"
-  }
-}
-
 export async function getShots(ctx) {
   const {limit = 10, before, after} = ctx.query
   const {username} = ctx.params
@@ -167,11 +112,7 @@ export async function getShots(ctx) {
     .populate('replyTo', 'username avatar')
     .exec()
 
-  shots.map(shot=> {
-    shot.liked = shot.likedUser.indexOf(sub) > -1
-    return shot
-  })
-  ctx.body = shots
+  ctx.body = checkShots(shots, sub)
 }
 
 export async function getShotById(ctx) {
@@ -185,7 +126,7 @@ export async function getShotById(ctx) {
   ctx.body = shot
 }
 
-export async function PutShotById(ctx){
+export async function LikeShotById(ctx){
   const userId = ctx.state.user.sub
   const {id} = ctx.params
   const {liked} = ctx.request.body

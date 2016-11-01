@@ -11,34 +11,16 @@ const schema = new Schema({
     default: '',
     trim: true
   },
-  commentsCount: {
-    type: Number,
-    default: 0
-  },
-  likesCount: {
-    type: Number,
-    default: 0
-  },
-  images: {
-    type: Array
-  },
-  latestComment: [{
+  parent: {
     type: Schema.Types.ObjectId,
-    ref: 'Comment'
-  }],
-  tags: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Tag'
-  }],
-  likedUser: [{
+    ref: 'Shot'
+  },
+  replyTo: {
     type: Schema.Types.ObjectId,
     ref: 'User'
-  }],
-  liked: {
-    type: Boolean,
-  }
+  },
 })
 
 schema.plugin(timestamp)
 
-export default mongoose.model('Shot', schema)
+export default mongoose.model('Comment', schema)
