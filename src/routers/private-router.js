@@ -10,7 +10,7 @@ router.get('/shots', shot.getShots)
 router.post('/shot', shot.addShot)
 router.post('/comment', comment.addComment)
 
-router.put('/shot/:id/like', shot.LikeShotById)
+router.put('/shot/:id/like', shot.likeShotById)
 router.put('/media/upload_image', media.uploadImage)
 
 export default router

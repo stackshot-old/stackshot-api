@@ -126,7 +126,7 @@ export async function getShotById(ctx) {
   ctx.body = shot
 }
 
-export async function LikeShotById(ctx){
+export async function likeShotById(ctx){
   const userId = ctx.state.user.sub
   const {id} = ctx.params
   const {liked} = ctx.request.body

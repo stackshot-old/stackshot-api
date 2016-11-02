@@ -33,10 +33,7 @@ const schema = new Schema({
   likedUser: [{
     type: Schema.Types.ObjectId,
     ref: 'User'
-  }],
-  liked: {
-    type: Boolean,
-  }
+  }]
 })
 
 schema.plugin(timestamp)
