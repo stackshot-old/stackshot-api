@@ -24,8 +24,8 @@ export async function addComment(ctx) {
     commentData.user = userId
 
     let savedComment
-    const shot = new Comment(commentData)
-    savedComment = await shot.save()
+    const comment = new Comment(commentData)
+    savedComment = await comment.save()
     const populated = await Comment.populate(savedComment, [
       { path: 'user', select: 'username avatar' },
       { path: 'parent', select: '_id'},
@@ -33,9 +33,9 @@ export async function addComment(ctx) {
     ])
     io.emit('new-comment', populated)
     // inc shotsComment in user schema
-    await Shot.findOneAndUpdate({_id: parent},{ $addToSet:{ latestComment: { $each:[savedComment._id], $slice: -7 } }, $inc: {commentsCount: 1 }}).exec()
+    const shot = await Shot.findOneAndUpdate({_id: parent},{ $push:{ latestComment: { $each:[savedComment._id], $slice: -5 } }, $inc: {commentsCount: 1 }}, {new: true}).exec()
 
-    ctx.body = savedComment
+    ctx.body = {shot: shot, comment: savedComment}
   } catch (e) {
     ctx.status = 403
     console.log(e.stack)

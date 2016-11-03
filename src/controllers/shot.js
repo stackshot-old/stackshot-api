@@ -4,7 +4,7 @@ import Shot from '../models/shot'
 import Tag from '../models/tag'
 import Comment from '../models/comment'
 import {validate} from '../common/helpers'
-import {checkShots} from '../utils'
+import {checkShots, checkShot} from '../utils'
 
 
 export async function addShot(ctx) {
@@ -108,7 +108,7 @@ export async function getShots(ctx) {
     .sort('-createdAt')
     .limit(parseInt(limit, 10))
     .populate('user', 'username avatar')
-    .populate('latestComment', '_id content user')
+    .populate({path: 'latestComment', select: '_id content user', populate:{ path: 'user', select:' username avatar'}})
     .populate('replyTo', 'username avatar')
     .exec()
 
@@ -132,16 +132,17 @@ export async function likeShotById(ctx){
   const {liked} = ctx.request.body
 
   if(liked === true){
+    await Shot.findOneAndUpdate({_id: id, likedUser:{$nin: [userId]}},{$addToSet:{likedUser: userId }, $inc:{ likesCount: 1}}).exec()
     await User.findOneAndUpdate({_id: userId},{ $addToSet:{likedShot: id }} ).exec()
-    await Shot.findOneAndUpdate({_id: id},{$addToSet:{likedUser: userId }, $inc:{ likesCount: 1}}).exec()
   }
   if(liked === false) {
-    await Shot.findOneAndUpdate({_id: id, likesCount: {$gt: 0}}, {$pull:{likedUser: userId}, $inc:{ likesCount: -1}}).exec()
+    await Shot.findOneAndUpdate({_id: id, likesCount: {$gt: 0}, likedUser:{$in: [userId]}}, {$pull:{likedUser: userId}, $inc:{ likesCount: -1}}).exec()
     await User.findOneAndUpdate({_id: userId}, { $pull:{likedShot: id}}).exec()
   }
-  const data = await Promise.all([
+  const [user, shot] = await Promise.all([
     User.findOne({_id: userId}),
     Shot.findOne({_id: id})
   ])
-  ctx.body = {user: data['0'], shot: data['1']}
+
+  ctx.body = { user: user, shot:checkShot(shot, userId) }
 }
