@@ -127,22 +127,22 @@ export async function getShotById(ctx) {
 }
 
 export async function likeShotById(ctx){
-  const userId = ctx.state.user.sub
+  const {sub} = ctx.state.user
   const {id} = ctx.params
   const {liked} = ctx.request.body
 
   if(liked === true){
-    await Shot.findOneAndUpdate({_id: id, likedUser:{$nin: [userId]}},{$addToSet:{likedUser: userId }, $inc:{ likesCount: 1}}).exec()
-    await User.findOneAndUpdate({_id: userId},{ $addToSet:{likedShot: id }} ).exec()
+    await Shot.findOneAndUpdate({_id: id, likedUser:{$nin: [sub]}},{$addToSet:{likedUser: sub }, $inc:{ likesCount: 1}}).exec()
+    await User.findOneAndUpdate({_id: sub},{ $addToSet:{likedShot: id }} ).exec()
   }
   if(liked === false) {
-    await Shot.findOneAndUpdate({_id: id, likesCount: {$gt: 0}, likedUser:{$in: [userId]}}, {$pull:{likedUser: userId}, $inc:{ likesCount: -1}}).exec()
-    await User.findOneAndUpdate({_id: userId}, { $pull:{likedShot: id}}).exec()
+    await Shot.findOneAndUpdate({_id: id, likesCount: {$gt: 0}, likedUser:{$in: [sub]}}, {$pull:{likedUser: sub}, $inc:{ likesCount: -1}}).exec()
+    await User.findOneAndUpdate({_id: sub}, { $pull:{likedShot: id}}).exec()
   }
   const [user, shot] = await Promise.all([
-    User.findOne({_id: userId}),
+    User.findOne({_id: sub}),
     Shot.findOne({_id: id})
   ])
 
-  ctx.body = { user: user, shot:checkShot(shot, userId) }
+  ctx.body = { user: user, shot:checkShot(shot, sub) }
 }
