@@ -9,7 +9,6 @@ export async function getUserByUsername(ctx) {
   if (user) {
     ctx.body = user
   } else {
-    ctx.status = 404
-    ctx.body = 'user not found'
+    ctx.throws(404, 'user not found')
   }
 }

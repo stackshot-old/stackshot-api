@@ -25,7 +25,7 @@ app.use(async (ctx, next) => {
   try {
     await next() // Attempt to go through the JWT Validator
   } catch (e) {
-    if (e.status == 401 ) {
+    if (e.status == 401) {
       // Prepare response to user.
       ctx.status = e.status
       ctx.body = {error: 'You don\'t have a signed token dude :('}

@@ -39,10 +39,8 @@ export async function signup(ctx) {
       token,
       user: user.getPublic()
     }
-  } catch (e) {
-    console.log(e.stack)
-    ctx.status = 403
-    ctx.body = e
+  } catch (err) {
+    ctx.throws(403, err)
   }
 }
 
@@ -58,10 +56,8 @@ export async function signin(ctx) {
       account: joi.string().min(2).max(20).required(),
       password: joi.string().min(6).max(20).required()
     }))
-  } catch (e) {
-    ctx.status = 403
-    ctx.body = e
-    return
+  } catch (err) {
+    return ctx.throws(403, err)
   }
 
   const user = await User.findOne({
@@ -74,20 +70,14 @@ export async function signin(ctx) {
     .exec()
 
   if (!user) {
-    ctx.status = 404
-    return ctx.body = {
-      error: 'User not found'
-    }
+    return ctx.throws(404, 'user not found')
   }
 
   const isPasswordCorrect = await encrypt.compare(userData.password, user.password)
   user.password = undefined
 
   if (!isPasswordCorrect) {
-    ctx.status = 403
-    return ctx.body = {
-      error: 'Passoword mismatches'
-    }
+    ctx.throws(403, 'Passoword mismatches')
   }
 
   const token = jwt.sign({sub: user.id}, privateKey, {algorithm: 'RS256'})

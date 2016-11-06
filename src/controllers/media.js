@@ -1,4 +1,3 @@
-import fs from 'fs'
 import busboy from 'async-busboy'
 import random from 'randomstring'
 import mime from 'mime'
@@ -30,10 +29,7 @@ export async function uploadImage(ctx) {
       return uploadImageStream(file)
     }))
     ctx.body = res
-  } catch (e) {
-    ctx.body = 403
-    ctx.body = {
-      error: e.message
-    }
+  } catch (err) {
+    ctx.throws(403, err)
   }
 }

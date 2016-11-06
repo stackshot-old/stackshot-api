@@ -18,7 +18,7 @@ const schema = new Schema({
   replyTo: {
     type: Schema.Types.ObjectId,
     ref: 'User'
-  },
+  }
 })
 
 schema.plugin(timestamp)

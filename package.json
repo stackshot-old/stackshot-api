@@ -14,7 +14,7 @@
     "node": ">=4"
   },
   "scripts": {
-    "test": "xo",
+    "test": "xo ./src/**/*.js",
     "start": "node index.js",
     "dev": "nodemon --exec npm run babel-node --watch src -- src/index.js",
     "build": "babel src -d lib",
@@ -37,7 +37,12 @@
   },
   "xo": {
     "semicolon": false,
-    "space": 2
+    "space": 2,
+    "rules": {
+      "import/prefer-default-export": 0,
+      "no-warning-comments": 0
+    },
+    "globals": ["io"]
   },
   "dependencies": {
     "async-busboy": "^0.1.1",

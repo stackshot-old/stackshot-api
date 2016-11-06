@@ -1,6 +1,5 @@
 import Router from 'koa-router'
 import * as shot from '../controllers/shot'
-import * as user from '../controllers/user'
 import * as media from '../controllers/media'
 import * as comment from '../controllers/comment'
 

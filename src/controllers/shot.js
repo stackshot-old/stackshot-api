@@ -2,10 +2,8 @@ import joi from 'joi'
 import User from '../models/user'
 import Shot from '../models/shot'
 import Tag from '../models/tag'
-import Comment from '../models/comment'
 import {validate} from '../common/helpers'
 import {checkShots, checkShot} from '../utils'
-
 
 export async function addShot(ctx) {
   const userId = ctx.state.user.sub
@@ -15,7 +13,7 @@ export async function addShot(ctx) {
   let shotData = {
     images: ctx.request.body.images,
     tags: ctx.request.body.tags || [],
-    content: ctx.request.body.content,
+    content: ctx.request.body.content
   }
 
   try {
@@ -27,7 +25,7 @@ export async function addShot(ctx) {
         height: joi.number().required()
       }).required()),
       tags: joi.array().items(joi.string()),
-      content: joi.string(),
+      content: joi.string()
     }))
     shotData.user = userId
 
@@ -40,17 +38,16 @@ export async function addShot(ctx) {
         }).populate('user', 'username avatar').exec()
         if (tag) {
           return tag
-        } else {
-          // tag does not exist, create a new one
-          const newTag = new Tag({name: tagName, user: user})
-          return await newTag.save()
         }
+        // tag does not exist, create a new one
+        const newTag = new Tag({name: tagName, user: userId})
+        return await newTag.save()
       }))
     }
     // TODO: deleredTags
     // decrease tag count for deletedTags in the shot
     let savedShot
-    console.log(savedShot);
+    console.log(savedShot)
 
     if (shotId) {
       savedShot = await Shot
@@ -71,10 +68,8 @@ export async function addShot(ctx) {
     }
 
     ctx.body = savedShot
-  } catch (e) {
-    ctx.status = 403
-    console.log(e.stack)
-    ctx.body = e
+  } catch (err) {
+    ctx.throws(403, err)
   }
 }
 
@@ -101,14 +96,12 @@ export async function getShots(ctx) {
     query.user = user
   }
 
-
-
   const shots = await Shot
     .find(query)
     .sort('-createdAt')
     .limit(parseInt(limit, 10))
     .populate('user', 'username avatar')
-    .populate({path: 'latestComment', select: '_id content user', populate:{ path: 'user', select:' username avatar'}})
+    .populate({path: 'latestComment', select: '_id content user', populate: {path: 'user', select: ' username avatar'}})
     .populate('replyTo', 'username avatar')
     .exec()
 
@@ -126,23 +119,23 @@ export async function getShotById(ctx) {
   ctx.body = shot
 }
 
-export async function likeShotById(ctx){
+export async function likeShotById(ctx) {
   const {sub} = ctx.state.user
   const {id} = ctx.params
   const {liked} = ctx.request.body
 
-  if(liked === true){
-    await Shot.findOneAndUpdate({_id: id, likedUser:{$nin: [sub]}},{$addToSet:{likedUser: sub }, $inc:{ likesCount: 1}}).exec()
-    await User.findOneAndUpdate({_id: sub},{ $addToSet:{likedShot: id }} ).exec()
+  if (liked === true) {
+    await Shot.findOneAndUpdate({_id: id, likedUser: {$nin: [sub]}}, {$addToSet: {likedUser: sub}, $inc: {likesCount: 1}}).exec()
+    await User.findOneAndUpdate({_id: sub}, {$addToSet: {likedShot: id}}).exec()
   }
-  if(liked === false) {
-    await Shot.findOneAndUpdate({_id: id, likesCount: {$gt: 0}, likedUser:{$in: [sub]}}, {$pull:{likedUser: sub}, $inc:{ likesCount: -1}}).exec()
-    await User.findOneAndUpdate({_id: sub}, { $pull:{likedShot: id}}).exec()
+  if (liked === false) {
+    await Shot.findOneAndUpdate({_id: id, likesCount: {$gt: 0}, likedUser: {$in: [sub]}}, {$pull: {likedUser: sub}, $inc: {likesCount: -1}}).exec()
+    await User.findOneAndUpdate({_id: sub}, {$pull: {likedShot: id}}).exec()
   }
   const [user, shot] = await Promise.all([
     User.findOne({_id: sub}),
     Shot.findOne({_id: id})
   ])
 
-  ctx.body = { user: user, shot:checkShot(shot, sub) }
+  ctx.body = {user: user, shot: checkShot(shot, sub)}
 }
