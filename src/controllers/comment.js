@@ -23,19 +23,22 @@ export async function addComment(ctx) {
     }))
     commentData.user = sub
 
-    let savedComment
     const comment = new Comment(commentData)
-    savedComment = await comment.save()
+    const savedComment = await comment.save()
+
+    // io.emit('new-comment', populated)
+    // inc shotsComment in user schema
+    await Shot.findOneAndUpdate({_id: shot},{
+      $inc: {commentsCount: 1 }
+    }, {new: true}).exec()
+
     const populated = await Comment.populate(savedComment, [
       { path: 'user', select: 'username avatar' },
       { path: 'shot', select: '_id'},
       { path: 'replyTo', select: 'username avatar'}
     ])
-    io.emit('new-comment', populated)
-    // inc shotsComment in user schema
-    const updateShot = await Shot.findOneAndUpdate({_id: shot},{ $push:{ latestComment: { $each:[savedComment._id], $slice: -5 } }, $inc: {commentsCount: 1 }}, {new: true}).exec()
 
-    ctx.body = {shot: updateShot, comment: savedComment}
+    ctx.body = populated
   } catch (e) {
     ctx.status = 403
     console.log(e.stack)
