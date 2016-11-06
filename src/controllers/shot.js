@@ -2,7 +2,10 @@ import joi from 'joi'
 import User from '../models/user'
 import Shot from '../models/shot'
 import Tag from '../models/tag'
+import Comment from '../models/comment'
 import {validate} from '../common/helpers'
+import {checkShots, checkShot} from '../utils'
+
 
 export async function addShot(ctx) {
   const userId = ctx.state.user.sub
@@ -11,7 +14,8 @@ export async function addShot(ctx) {
 
   let shotData = {
     images: ctx.request.body.images,
-    tags: ctx.request.body.tags || []
+    tags: ctx.request.body.tags || [],
+    content: ctx.request.body.content,
   }
 
   try {
@@ -21,8 +25,9 @@ export async function addShot(ctx) {
         description: joi.any().optional(),
         width: joi.number().required(),
         height: joi.number().required()
-      }).required()).required(),
-      tags: joi.array().items(joi.string())
+      }).required()),
+      tags: joi.array().items(joi.string()),
+      content: joi.string(),
     }))
     shotData.user = userId
 
@@ -76,6 +81,7 @@ export async function addShot(ctx) {
 export async function getShots(ctx) {
   const {limit = 10, before, after} = ctx.query
   const {username} = ctx.params
+  const {sub} = ctx.state.user || {}
 
   const query = {}
   if (before) {
@@ -95,14 +101,18 @@ export async function getShots(ctx) {
     query.user = user
   }
 
+
+
   const shots = await Shot
     .find(query)
     .sort('-createdAt')
     .limit(parseInt(limit, 10))
     .populate('user', 'username avatar')
+    .populate({path: 'latestComment', select: '_id content user', populate:{ path: 'user', select:' username avatar'}})
+    .populate('replyTo', 'username avatar')
     .exec()
 
-  ctx.body = shots
+  ctx.body = checkShots(shots, sub)
 }
 
 export async function getShotById(ctx) {
@@ -114,4 +124,25 @@ export async function getShotById(ctx) {
     .exec()
 
   ctx.body = shot
+}
+
+export async function likeShotById(ctx){
+  const {sub} = ctx.state.user
+  const {id} = ctx.params
+  const {liked} = ctx.request.body
+
+  if(liked === true){
+    await Shot.findOneAndUpdate({_id: id, likedUser:{$nin: [sub]}},{$addToSet:{likedUser: sub }, $inc:{ likesCount: 1}}).exec()
+    await User.findOneAndUpdate({_id: sub},{ $addToSet:{likedShot: id }} ).exec()
+  }
+  if(liked === false) {
+    await Shot.findOneAndUpdate({_id: id, likesCount: {$gt: 0}, likedUser:{$in: [sub]}}, {$pull:{likedUser: sub}, $inc:{ likesCount: -1}}).exec()
+    await User.findOneAndUpdate({_id: sub}, { $pull:{likedShot: id}}).exec()
+  }
+  const [user, shot] = await Promise.all([
+    User.findOne({_id: sub}),
+    Shot.findOne({_id: id})
+  ])
+
+  ctx.body = { user: user, shot:checkShot(shot, sub) }
 }

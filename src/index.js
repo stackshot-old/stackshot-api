@@ -37,7 +37,8 @@ app.use(async (ctx, next) => {
 
 app.use(convert(jwt({
   secret: publicKey,
-  algorithm: 'RS256'
+  algorithm: 'RS256',
+  passthrough: true
 })))
 
 app.use(privateRouter.routes())

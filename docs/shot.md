@@ -19,3 +19,5 @@ POST `/shot`
   tags: ['腐女']
 }
 ```
+
+返回字段: { ...shotSchema }
