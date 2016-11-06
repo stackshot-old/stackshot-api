@@ -5,3 +5,4 @@ node_modules
 *.rsa
 *.pub
 .env
+yarn.lock
