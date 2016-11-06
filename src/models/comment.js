@@ -11,7 +11,7 @@ const schema = new Schema({
     default: '',
     trim: true
   },
-  parent: {
+  shot: {
     type: Schema.Types.ObjectId,
     ref: 'Shot'
   },
