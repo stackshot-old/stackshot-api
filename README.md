@@ -1,10 +1,6 @@
 # Stackshot API
 
-```bash
-$ npm install
-
-$ npm run dev
-```
+![test](https://img.shields.io/circleci/project/github/stackshot/stackshot-api/master.svg)
 
 ## Before getting started
 
@@ -26,4 +22,12 @@ $ cp .env-example .env
 
 ```bash
 $ sudo mongod
+```
+
+## Development
+
+```bash
+$ npm install
+
+$ npm run dev
 ```
