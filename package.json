@@ -33,7 +33,9 @@
     "babel-preset-stage-1": "^6.13.0",
     "concurrently": "^2.2.0",
     "nodemon": "^1.10.0",
-    "xo": "latest"
+    "socket.io-client": "^1.5.1",
+    "xo": "latest",
+    "yargs": "^6.4.0"
   },
   "xo": {
     "semicolon": false,

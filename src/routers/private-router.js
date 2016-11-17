@@ -5,6 +5,7 @@ import * as comment from '../controllers/comment'
 
 const router = new Router()
 
+router.get('/replys', comment.getReplys)
 router.get('/shots', shot.getShots)
 router.post('/shot', shot.addShot)
 router.post('/comment', comment.addComment)
