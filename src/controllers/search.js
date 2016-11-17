@@ -1,8 +1,8 @@
 import Shot from '../models/shot'
-import {checkShots, checkShot} from '../utils'
+import {checkShots} from '../utils'
 
-export default async function search (ctx) {
-  const { limit = 10, content, before, after } = ctx.request.query
+export default async function search(ctx) {
+  const {limit = 10, content, before, after} = ctx.request.query
   const {sub} = ctx.state.user || {}
 
   let query = {
@@ -14,7 +14,6 @@ export default async function search (ctx) {
   if (after) {
     query.createdAt = {$gt: new Date(after)}
   }
-
 
   const shots = await Shot
     .find(query)

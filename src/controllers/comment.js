@@ -1,14 +1,13 @@
 import joi from 'joi'
+import mongoose from 'mongoose'
 import Comment from '../models/comment'
 import Shot from '../models/shot'
 import {validate} from '../common/helpers'
-import mongoose from 'mongoose'
 
 export async function getReplys(ctx) {
   const {limit = 10, before, after} = ctx.query
   const {sub} = ctx.state.user
-
-  const query = { replyTo: mongoose.Types.ObjectId(sub) }
+  const query = {replyTo: mongoose.Types.ObjectId(sub)} // eslint-disable-line new-cap
   if (before) {
     query.createdAt = {$lt: new Date(before)}
   }
@@ -30,15 +29,13 @@ export async function getReplys(ctx) {
 
 export async function getComments(ctx) {
   const {limit = 10, before, after, shot} = ctx.query
-
-  const query = { shot: mongoose.Types.ObjectId(shot) }
+  const query = {shot: mongoose.Types.ObjectId(shot)} // eslint-disable-line new-cap
   if (before) {
     query.createdAt = {$lt: new Date(before)}
   }
   if (after) {
     query.createdAt = {$gt: new Date(after)}
   }
-
   const comments = await Comment
     .find(query)
     .sort('-createdAt')
