@@ -2,8 +2,8 @@ import Router from 'koa-router'
 import * as auth from '../controllers/auth'
 import * as shot from '../controllers/shot'
 import * as user from '../controllers/user'
-import search from '../controllers/search'
 import * as comment from '../controllers/comment'
+import search from '../controllers/search'
 
 const router = new Router()
 

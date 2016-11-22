@@ -25,6 +25,18 @@ const schema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  gender: {
+    type: String
+  },
+  birthday: {
+    type: Date
+  },
+  website: {
+    type: String
+  },
+  signature: {
+    type: String
+  },
   commentsCount: {
     type: Number,
     default: 0
@@ -49,6 +61,11 @@ schema.plugin(timestamp)
 schema.methods.getPublic = function () {
   return _.pick(this, [
     'username',
+    'avatar',
+    'gender',
+    'website',
+    'signature',
+    'birthday',
     'createdAt',
     'updatedAt',
     '_id'

@@ -1,5 +1,5 @@
 import Shot from '../models/shot'
-import {checkShots} from '../utils'
+import {checkShots} from '../common/helpers'
 
 export default async function search(ctx) {
   const {limit = 10, content, before, after} = ctx.request.query

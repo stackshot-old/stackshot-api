@@ -2,8 +2,7 @@ import joi from 'joi'
 import User from '../models/user'
 import Shot from '../models/shot'
 import Tag from '../models/tag'
-import {validate} from '../common/helpers'
-import {checkShots, checkShot} from '../utils'
+import {validate, checkShots, checkShot} from '../common/helpers'
 
 export async function addShot(ctx) {
   const userId = ctx.state.user.sub
@@ -76,7 +75,7 @@ export async function addShot(ctx) {
 export async function getShots(ctx) {
   const {limit = 10, before, after} = ctx.query
   const {username} = ctx.params
-  const {sub} = ctx.state.user
+  const {sub} = ctx.state.user || {}
 
   const query = {}
   if (before) {
