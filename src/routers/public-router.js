@@ -2,11 +2,17 @@ import Router from 'koa-router'
 import * as auth from '../controllers/auth'
 import * as shot from '../controllers/shot'
 import * as user from '../controllers/user'
+import * as comment from '../controllers/comment'
+import search from '../controllers/search'
 
 const router = new Router()
 
 router.post('/auth/signup', auth.signup)
 router.post('/auth/signin', auth.signin)
+
+router.get('/search', search)
+
+router.get('/comments', comment.getComments)
 
 router.get('/shots/:id', shot.getShotById)
 

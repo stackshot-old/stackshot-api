@@ -4,6 +4,8 @@
 
 PUT `/media/upload_image`
 
+`!token`
+
 返回示例:
 
 ```json

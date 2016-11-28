@@ -2,8 +2,7 @@ import joi from 'joi'
 import User from '../models/user'
 import Shot from '../models/shot'
 import Tag from '../models/tag'
-import {validate} from '../common/helpers'
-import {checkShots, checkShot} from '../utils'
+import {validate, checkShots, checkShot} from '../common/helpers'
 
 export async function addShot(ctx) {
   const userId = ctx.state.user.sub
@@ -23,7 +22,7 @@ export async function addShot(ctx) {
         description: joi.any().optional(),
         width: joi.number().required(),
         height: joi.number().required()
-      }).required()),
+      }).required()).required(),
       tags: joi.array().items(joi.string()),
       content: joi.string()
     }))

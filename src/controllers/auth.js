@@ -35,12 +35,13 @@ export async function signup(ctx) {
       algorithm: 'RS256',
       expiresIn: '180d' // half a year
     })
+
     ctx.body = {
       token,
       user: user.getPublic()
     }
   } catch (err) {
-    ctx.throws(403, err)
+    ctx.throw(403, err)
   }
 }
 
@@ -57,7 +58,7 @@ export async function signin(ctx) {
       password: joi.string().min(6).max(20).required()
     }))
   } catch (err) {
-    return ctx.throws(403, err)
+    return ctx.throw(403, err)
   }
 
   const user = await User.findOne({
@@ -70,14 +71,14 @@ export async function signin(ctx) {
     .exec()
 
   if (!user) {
-    return ctx.throws(404, 'user not found')
+    return ctx.throw(404, 'user not found')
   }
 
   const isPasswordCorrect = await encrypt.compare(userData.password, user.password)
   user.password = undefined
 
   if (!isPasswordCorrect) {
-    ctx.throws(403, 'Passoword mismatches')
+    ctx.throw(403, 'Passoword mismatches')
   }
 
   const token = jwt.sign({sub: user.id}, privateKey, {algorithm: 'RS256'})
