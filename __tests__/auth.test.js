@@ -1,11 +1,10 @@
 import request from 'superagent'
-import {url, testAccount, testAccountTest} from './config'
-
-const genUniqueString = (salt) => `${salt}${Math.random().toString(36).substr(2, 10)}`
+import {url, testAccount} from './config'
+import {genUniqueString} from './util'
 
 describe('auth', () => {
   it('signup', async () => {
-    const data = {username: genUniqueString('test-'), password: '123456', email: `${genUniqueString('test-')}@tucao.com`}
+    const data = {username: genUniqueString('test-'), password: '000000', email: `${genUniqueString('test-')}@tucao.com`}
     const {body: {token, user}} = await request.post(`${url}/auth/signup`).send(data)
 
     expect(token).toBeDefined()
@@ -17,5 +16,12 @@ describe('auth', () => {
 
     expect(token).toBeDefined()
     expect(user).toBeDefined()
+  })
+
+  it('get auth user', async () => {
+    const {body: {token}} = await request.post(`${url}/auth/signin`).send(testAccount)
+    const {body} = await request.get(`${url}/auth/user`).set('Authorization', `Bearer ${token}`)
+
+    expect(body).toBeDefined()
   })
 })

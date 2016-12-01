@@ -1,15 +1,13 @@
 import request from 'superagent'
 import {url, testAccount} from './config'
 
-
-
 describe('like', () => {
   it(' handle like and dislike', async () => {
     //sign in
     const {body: { token }} = await request.post(`${url}/auth/signin`).send(testAccount)
 
     // get random shot
-    const {body: [ shot ]} = await request.get(`${url}/shots`).query({limit: 5})
+    const {body: [ shot ]} = await request.get(`${url}/shots`).query({limit: 1})
     const {_id} = shot
 
     //like
