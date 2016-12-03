@@ -29,7 +29,7 @@ export const checkShot = (shot, userId) => {
   return shot
 }
 
-export const checkShots = (shots, userId) => shots.map(shot => checkShot(shot, userId))
+export const checkShots = (shots, userId) => userId ? shots.map(shot => checkShot(shot, userId)) : shots
 
 export const bodyNotEmpty = async (ctx, next) => {
   let body = ctx.request.body

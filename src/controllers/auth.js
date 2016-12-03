@@ -87,3 +87,16 @@ export async function signin(ctx) {
     user
   }
 }
+
+export async function getAuthUser(ctx) {
+  const sub = ctx.state.user && ctx.state.user.sub
+  if(!sub){
+    ctx.throw(401)
+  }
+
+  const user = await User
+    .findById(sub)
+    .exec()
+
+  ctx.body = user
+}

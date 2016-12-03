@@ -52,6 +52,10 @@ const schema = new mongoose.Schema({
   likedShot: [{
     type: Schema.Types.ObjectId,
     ref: 'Shot'
+  }],
+  newComments: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Comment'
   }]
 })
 
