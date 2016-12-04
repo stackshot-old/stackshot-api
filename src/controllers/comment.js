@@ -2,11 +2,17 @@ import joi from 'joi'
 import mongoose from 'mongoose'
 import Comment from '../models/comment'
 import Shot from '../models/shot'
+import Message from '../models/message'
 import {validate} from '../common/helpers'
 
 export async function getReplys(ctx) {
   const {limit = 10, before, after} = ctx.query
-  const {sub} = ctx.state.user
+
+  const sub = ctx.state.user && ctx.state.user.sub
+  if (!sub) {
+    ctx.throw(401)
+  }
+
   const query = {replyTo: mongoose.Types.ObjectId(sub)} // eslint-disable-line new-cap
   if (before) {
     query.createdAt = {$lt: new Date(before)}
@@ -49,7 +55,11 @@ export async function getComments(ctx) {
 }
 
 export async function addComment(ctx) {
-  const {sub} = ctx.state.user
+  const sub = ctx.state.user && ctx.state.user.sub
+  if (!sub) {
+    ctx.throw(401)
+  }
+
   const {shot, replyTo, content} = ctx.request.body
   let commentData = {
     content,
@@ -68,20 +78,26 @@ export async function addComment(ctx) {
     const comment = new Comment(commentData)
     const savedComment = await comment.save()
 
-    // io.emit('new-comment', populated)
     // inc shotsComment in user schema
     await Shot.findOneAndUpdate({_id: shot}, {
       $inc: {commentsCount: 1}
     }, {new: true}).exec()
+
+    if (replyTo) {
+      const existMessage = await Message.findOneAndUpdate({user: replyTo, shot: shot}, {$addToSet: {comments: comment._id}})
+      if (!existMessage) {
+        const newMessage = new Message({user: replyTo, shot: shot, comments: [comment._id]})
+        newMessage.save()
+      }
+    }
 
     const populated = await Comment.populate(savedComment, [
       {path: 'user', select: 'username avatar'},
       {path: 'shot', select: '_id'},
       {path: 'replyTo', select: 'username avatar'}
     ])
-
     ctx.body = populated
   } catch (err) {
-    ctx.throws(403, err)
+    ctx.throw(403, err)
   }
 }

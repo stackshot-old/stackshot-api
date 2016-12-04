@@ -1,4 +1,5 @@
 import joi from 'joi'
+import mongoose from 'mongoose'
 import User from '../models/user'
 import Shot from '../models/shot'
 import Tag from '../models/tag'
@@ -59,7 +60,8 @@ export async function addShot(ctx) {
         path: 'user',
         select: 'username avatar'
       })
-      io.emit('new-shot', populated)
+
+      io.emit('new-shot', {id: populated.id})
       // inc shotsComment in user schema
       await User.findOneAndUpdate({_id: userId}, {
         $inc: {shotsCount: 1}
@@ -75,8 +77,8 @@ export async function addShot(ctx) {
 export async function getShots(ctx) {
   const {limit = 10, before, after} = ctx.query
   const {username} = ctx.params
-  const {sub} = ctx.state.user || {}
 
+  const {sub} = ctx.state.user || {}
   const query = {}
   if (before) {
     query.createdAt = {$lt: new Date(before)}
@@ -92,7 +94,7 @@ export async function getShots(ctx) {
       ctx.body = 'user not found'
       return
     }
-    query.user = user
+    query.user = mongoose.Types.ObjectId(user._id) // eslint-disable-line new-cap
   }
 
   const shots = await Shot
@@ -100,7 +102,7 @@ export async function getShots(ctx) {
     .sort('-createdAt')
     .limit(parseInt(limit, 10))
     .populate('user', 'username avatar')
-    .populate({path: 'latestComment', select: '_id content user', populate: {path: 'user', select: ' username avatar'}})
+    .populate({path: 'latestComment', select: '_id content user', populate: {path: 'user', select: '_id username avatar'}})
     .populate('replyTo', 'username avatar')
     .exec()
 

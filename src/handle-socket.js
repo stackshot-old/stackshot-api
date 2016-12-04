@@ -16,11 +16,12 @@ export default server => {
     })
 
     socket.on('new-reply', data => {
-      const { uid, to, comment } = data
+      //uid: userId; cid: commentId
+      const { from, to, cid } = data
 
       if(this.online[to]){
         // console.dir(`[user]${uid} reply [user]${to} with [comment]${JSON.stringify(comment)}`, {colors: true})
-        io.sockets.to(to).emit('message', {message: 'new-reply', uid, comment})
+        io.sockets.to(to).emit('message', {message: 'new-reply', from, cid})
       }
     })
 
