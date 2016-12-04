@@ -102,7 +102,7 @@ export async function getShots(ctx) {
     .sort('-createdAt')
     .limit(parseInt(limit, 10))
     .populate('user', 'username avatar')
-    .populate({path: 'latestComment', select: '_id content user', populate: {path: 'user', select: ' username avatar'}})
+    .populate({path: 'latestComment', select: '_id content user', populate: {path: 'user', select: '_id username avatar'}})
     .populate('replyTo', 'username avatar')
     .exec()
 

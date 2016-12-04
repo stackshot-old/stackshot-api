@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 import Comment from '../models/comment'
 import User from '../models/user'
 import Shot from '../models/shot'
+import Message from '../models/message'
 import {validate} from '../common/helpers'
 
 export async function getReplys(ctx) {
@@ -79,22 +80,17 @@ export async function addComment(ctx) {
     const savedComment = await comment.save()
 
     // inc shotsComment in user schema
-    const { user } = await Shot.findOneAndUpdate({_id: shot}, {
+    await Shot.findOneAndUpdate({_id: shot}, {
       $inc: {commentsCount: 1}
     }, {new: true}).exec()
 
-    // save and send new message by replyTo
+
     if(replyTo){
-      await User.findOneAndUpdate({_id: replyTo}, {
-        $addToSet: {newComments: savedComment._id}
-      })
-    }
-    // save and send new message by comment
-    // change "user" to "author" maybe more readable
-    if(user && replyTo !== user){
-      await User.findOneAndUpdate({_id: user}, {
-        $addToSet: {newComments: savedComment._id}
-      })
+      const existMessage = await Message.findOneAndUpdate({user: replyTo, shot: shot},{$addToSet: {comments: comment._id}})
+      if(!existMessage) {
+        const newMessage = new Message({user: replyTo, shot: shot, comments: [comment._id]})
+        newMessage.save()
+      }
     }
 
     const populated = await Comment.populate(savedComment, [

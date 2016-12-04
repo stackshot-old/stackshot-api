@@ -7,4 +7,6 @@ describe('get shots', () => {
 
     expect(shots.body.length).toEqual(5)
   })
+  
+  //TODO: add shot
 })
