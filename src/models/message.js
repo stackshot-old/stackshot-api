@@ -9,7 +9,7 @@ const schema = new Schema({
   },
   shot: {
     type: Schema.Types.ObjectId,
-    ref: 'Shot',
+    ref: 'Shot'
   },
   comments: [{
     type: Schema.Types.ObjectId,

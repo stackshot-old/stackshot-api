@@ -1,7 +1,6 @@
 import joi from 'joi'
 import mongoose from 'mongoose'
 import Comment from '../models/comment'
-import User from '../models/user'
 import Shot from '../models/shot'
 import Message from '../models/message'
 import {validate} from '../common/helpers'
@@ -10,7 +9,7 @@ export async function getReplys(ctx) {
   const {limit = 10, before, after} = ctx.query
 
   const sub = ctx.state.user && ctx.state.user.sub
-  if(!sub){
+  if (!sub) {
     ctx.throw(401)
   }
 
@@ -57,7 +56,7 @@ export async function getComments(ctx) {
 
 export async function addComment(ctx) {
   const sub = ctx.state.user && ctx.state.user.sub
-  if(!sub){
+  if (!sub) {
     ctx.throw(401)
   }
 
@@ -84,10 +83,9 @@ export async function addComment(ctx) {
       $inc: {commentsCount: 1}
     }, {new: true}).exec()
 
-
-    if(replyTo){
-      const existMessage = await Message.findOneAndUpdate({user: replyTo, shot: shot},{$addToSet: {comments: comment._id}})
-      if(!existMessage) {
+    if (replyTo) {
+      const existMessage = await Message.findOneAndUpdate({user: replyTo, shot: shot}, {$addToSet: {comments: comment._id}})
+      if (!existMessage) {
         const newMessage = new Message({user: replyTo, shot: shot, comments: [comment._id]})
         newMessage.save()
       }
